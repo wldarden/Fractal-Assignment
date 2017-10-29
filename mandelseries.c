@@ -35,7 +35,7 @@ long double getS(int x,long double a, int nMandels, long double minS) {
 int main (int argc, char *argv[]) {
   int nProcs = 3; // input arg of how many proccesses to have
   int cProcs = 0; // current running mandel procs
-  double nMandels = 3; // how many mandel pictures to make
+  double nMandels = 15; // how many mandel pictures to make
   int cMandel = 0; // current index of Mandel picture
   char cBuffer[200]; // holds mandel command string
   char command[] = "./mandel";
