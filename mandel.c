@@ -24,7 +24,7 @@ void show_help()
 	printf("-W <pixels>  Width of the image in pixels. (default=500)\n");
 	printf("-H <pixels>  Height of the image in pixels. (default=500)\n");
 	printf("-o <file>    Set output file. (default=mandel.bmp)\n");
-	printf("-t <threads> Set number of threads to use. (default=3)\n");
+	printf("-n <threads> Set number of threads to use. (default=3)\n");
 	printf("-h           Show this help text.\n");
 	printf("\nSome examples are:\n");
 	printf("mandel -x -0.5 -y -0.5 -s 0.2\n");
@@ -51,7 +51,7 @@ int main( int argc, char *argv[] )
 	// For each command line argument given,
 	// override the appropriate configuration value.
 
-	while((c = getopt(argc,argv,"x:y:s:W:H:m:o:t:h"))!=-1) {
+	while((c = getopt(argc,argv,"x:y:s:W:H:m:o:n:h"))!=-1) {
 		switch(c) {
 			case 'x':
 				xcenter = atof(optarg);
@@ -74,7 +74,7 @@ int main( int argc, char *argv[] )
 			case 'o':
 				outfile = optarg;
 				break;
-			case 't':
+			case 'n':
 				nThreads = atoi(optarg);
 				break;
 			case 'h':
@@ -105,10 +105,18 @@ int main( int argc, char *argv[] )
 	for (int i = 0; i < nThreads; i++) {
 		int hmin = sectionHeight * (i-1);
 		int hmax = sectionHeight * i;
+		if (i + 1 == nThreads) {
+			hmax = totalHeight;
+		}
+		// Compute the Mandelbrot image subset
 		pthread_create(&threads[i], NULL, compute_image(bm,xcenter-scale,xcenter+scale,ycenter-scale,ycenter+scale,max,hmin,hmax), NULL );
 		// compute_image(bm,xcenter-scale,xcenter+scale,ycenter-scale,ycenter+scale,max,hmin,hmax);
 	}
-	// Compute the Mandelbrot image subset
+	for (int i = 0; i < nThreads; i++) {
+		pthread_join(threads[i], NULL);
+		free(threads[i]);
+	}
+	free(threads);
 
 
 	// Save the image in the stated file.

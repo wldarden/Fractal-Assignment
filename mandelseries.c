@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <getopt.h>
 
 // Part 1: Multiple Processes
 // Now, write a new program mandelseries that runs mandel 50 times, using what you
@@ -33,9 +34,18 @@ long double getS(int x,long double a, int nMandels, long double minS) {
 
 
 int main (int argc, char *argv[]) {
+  char c;
   int nProcs = 3; // input arg of how many proccesses to have
+  printf("%i\n", argc);
+  if (argc > 2){
+    printf("Usage: mandelseries <Process Count>");
+    exit(1);
+  } else if (argc == 2) {
+    nProcs = atoi(argv[1]);
+  }
+
   int cProcs = 0; // current running mandel procs
-  double nMandels = 15; // how many mandel pictures to make
+  double nMandels = 50; // how many mandel pictures to make
   int cMandel = 0; // current index of Mandel picture
   char cBuffer[200]; // holds mandel command string
   char command[] = "./mandel";
@@ -43,7 +53,7 @@ int main (int argc, char *argv[]) {
   int w = 2000;
   int h = 2000;
   int m = 1100;
-  int t = 3; // threads
+  int t = 10; // threads
   long double x = .330658;
   long double y = .42685;
   long double maxS = 2; // least zoom
@@ -71,7 +81,7 @@ int main (int argc, char *argv[]) {
       sprintf(sy, "-y %1.15Lf", y);
       sprintf(sm, "-m %i", m);
       sprintf(ss, "-s %1.15Lf", cS);
-      sprintf(st, "-t %i", t);
+      sprintf(st, "-n %i", t);
       execl("./mandel", command, sw, sh, sx, sy, sm, ss, st, outfile, (char *) NULL);
       printf( "Error exec failed: Mandel %i\n", cMandel);
       exit(1);
