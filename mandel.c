@@ -7,10 +7,11 @@
 #include <math.h>
 #include <errno.h>
 #include <string.h>
+#include <pthread.h>
 
 int iteration_to_color( int i, int max );
 int iterations_at_point( double x, double y, int max );
-void compute_image( struct bitmap *bm, double xmin, double xmax, double ymin, double ymax, int max );
+void* compute_image( struct bitmap *bm, double xmin, double xmax, double ymin, double ymax, int max, int hmin, int hmax );
 
 void show_help()
 {
@@ -45,7 +46,7 @@ int main( int argc, char *argv[] )
 	int    image_width = 500;
 	int    image_height = 500;
 	int    max = 1000;
-	int    threads = 3;
+	int    nThreads = 3;
 
 	// For each command line argument given,
 	// override the appropriate configuration value.
@@ -74,7 +75,7 @@ int main( int argc, char *argv[] )
 				outfile = optarg;
 				break;
 			case 't':
-				threads = atoi(optarg);
+				nThreads = atoi(optarg);
 				break;
 			case 'h':
 				show_help();
@@ -92,8 +93,23 @@ int main( int argc, char *argv[] )
 	// Fill it with a dark blue, for debugging
 	bitmap_reset(bm,MAKE_RGBA(0,0,255,0));
 
-	// Compute the Mandelbrot image
-	compute_image(bm,xcenter-scale,xcenter+scale,ycenter-scale,ycenter+scale,max);
+	//divide problem into sub problems
+	int totalHeight = bitmap_height(bm);
+	int sectionHeight = totalHeight / nThreads;
+	//create threads
+	pthread_t* threads = malloc(nThreads * sizeof(pthread_t*));
+	for (int i = 0; i < nThreads; i++) {
+		threads[i] = malloc(sizeof(pthread_t));
+	}
+
+	for (int i = 0; i < nThreads; i++) {
+		int hmin = sectionHeight * (i-1);
+		int hmax = sectionHeight * i;
+		pthread_create(&threads[i], NULL, compute_image(bm,xcenter-scale,xcenter+scale,ycenter-scale,ycenter+scale,max,hmin,hmax), NULL );
+		// compute_image(bm,xcenter-scale,xcenter+scale,ycenter-scale,ycenter+scale,max,hmin,hmax);
+	}
+	// Compute the Mandelbrot image subset
+
 
 	// Save the image in the stated file.
 	if(!bitmap_save(bm,outfile)) {
@@ -109,7 +125,7 @@ Compute an entire Mandelbrot image, writing each point to the given bitmap.
 Scale the image to the range (xmin-xmax,ymin-ymax), limiting iterations to "max"
 */
 
-void compute_image( struct bitmap *bm, double xmin, double xmax, double ymin, double ymax, int max )
+void* compute_image( struct bitmap *bm, double xmin, double xmax, double ymin, double ymax, int max, int hmin, int hmax )
 {
 	int i,j;
 
@@ -118,7 +134,7 @@ void compute_image( struct bitmap *bm, double xmin, double xmax, double ymin, do
 
 	// For every pixel in the image...
 
-	for(j=0;j<height;j++) {
+	for(j=hmin;j<hmax;j++) {
 
 		for(i=0;i<width;i++) {
 
@@ -133,6 +149,7 @@ void compute_image( struct bitmap *bm, double xmin, double xmax, double ymin, do
 			bitmap_set(bm,i,j,iters);
 		}
 	}
+	return (void*) 0;
 }
 
 /*
