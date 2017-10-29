@@ -18,27 +18,41 @@
 // wait for one to complete. As soon as one completes, start the next, and keep going until
 // all the work is complete. mandelseries should work correctly for any arbitrary
 // number of processes given on the command line.
+// s =
+// 2 = 0^2 + 0 + 2
+// y = a(x-h)^2 + k
+// h = nMandels
+// k = minS
+// 2 = a(0 - nMandels)^2 + minS
+// 2 = a(nMandels^2) + minS
+// (2 - minS)/nMandels^2 = a
+
+long double getS(int x,long double a, int nMandels, long double minS) {
+  return (a * ((x - nMandels) * (x - nMandels))) + minS;
+}
+
 
 int main (int argc, char *argv[]) {
   int nProcs = 3; // input arg of how many proccesses to have
   int cProcs = 0; // current running mandel procs
-  double nMandels = 10; // how many mandel pictures to make
+  double nMandels = 3; // how many mandel pictures to make
   int cMandel = 0; // current index of Mandel picture
   char cBuffer[200]; // holds mandel command string
   char command[] = "./mandel";
   char outfile[30];
   int w = 2000;
   int h = 2000;
-  int m = 1075;
+  int m = 1100;
+  int t = 3; // threads
   long double x = .330658;
   long double y = .42685;
   long double maxS = 2; // least zoom
-  long double minS = .00000005; // farthest zoom
+  long double minS = .000000005; // farthest zoom
   long double cS = maxS; // current s
-  char sw[25], sh[25], sm[25], sx[25], sy[25], ss[25]; // string version of arguments
-  long double step = (maxS - minS) / (nMandels-1); // s change size
-  printf("step: %1.15Lf, %1.15Lf, %1.15Lf\n", step, (maxS - minS), minS);
+  char sw[25], sh[25], sm[25], sx[25], sy[25], ss[25], st[25]; // string version of arguments
+  // long double step = (maxS - minS) / (nMandels-1); // s change size
   int status;
+  long double a = (2 - minS) / ((nMandels - 1) * (nMandels - 1)); // calculate quadratic step consant
   //create proccesses
   while (cMandel < nMandels) {
     if (cProcs >= nProcs) { //max procs. wait for any one to finish
@@ -57,14 +71,15 @@ int main (int argc, char *argv[]) {
       sprintf(sy, "-y %1.15Lf", y);
       sprintf(sm, "-m %i", m);
       sprintf(ss, "-s %1.15Lf", cS);
-      execl("./mandel", command, sw, sh, sx, sy, sm, ss, outfile, (char *) NULL);
+      sprintf(st, "-t %i", t);
+      execl("./mandel", command, sw, sh, sx, sy, sm, ss, st, outfile, (char *) NULL);
       printf( "Error exec failed: Mandel %i\n", cMandel);
       exit(1);
     } else if (pid == -1) {
       printf("Error forking process: Mandel %i\n", cMandel);
     }
     cMandel++;
-    cS -= step;
+    cS = getS(cMandel, a, nMandels-1, minS);
   }
 
 

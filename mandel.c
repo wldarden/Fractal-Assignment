@@ -16,14 +16,15 @@ void show_help()
 {
 	printf("Use: mandel [options]\n");
 	printf("Where options are:\n");
-	printf("-m <max>    The maximum number of iterations per point. (default=1000)\n");
-	printf("-x <coord>  X coordinate of image center point. (default=0)\n");
-	printf("-y <coord>  Y coordinate of image center point. (default=0)\n");
-	printf("-s <scale>  Scale of the image in Mandlebrot coordinates. (default=4)\n");
-	printf("-W <pixels> Width of the image in pixels. (default=500)\n");
-	printf("-H <pixels> Height of the image in pixels. (default=500)\n");
-	printf("-o <file>   Set output file. (default=mandel.bmp)\n");
-	printf("-h          Show this help text.\n");
+	printf("-m <max>     The maximum number of iterations per point. (default=1000)\n");
+	printf("-x <coord>   X coordinate of image center point. (default=0)\n");
+	printf("-y <coord>   Y coordinate of image center point. (default=0)\n");
+	printf("-s <scale>   Scale of the image in Mandlebrot coordinates. (default=4)\n");
+	printf("-W <pixels>  Width of the image in pixels. (default=500)\n");
+	printf("-H <pixels>  Height of the image in pixels. (default=500)\n");
+	printf("-o <file>    Set output file. (default=mandel.bmp)\n");
+	printf("-t <threads> Set number of threads to use. (default=3)\n");
+	printf("-h           Show this help text.\n");
 	printf("\nSome examples are:\n");
 	printf("mandel -x -0.5 -y -0.5 -s 0.2\n");
 	printf("mandel -x -.38 -y -.665 -s .05 -m 100\n");
@@ -44,11 +45,12 @@ int main( int argc, char *argv[] )
 	int    image_width = 500;
 	int    image_height = 500;
 	int    max = 1000;
+	int    threads = 3;
 
 	// For each command line argument given,
 	// override the appropriate configuration value.
 
-	while((c = getopt(argc,argv,"x:y:s:W:H:m:o:h"))!=-1) {
+	while((c = getopt(argc,argv,"x:y:s:W:H:m:o:t:h"))!=-1) {
 		switch(c) {
 			case 'x':
 				xcenter = atof(optarg);
@@ -70,6 +72,9 @@ int main( int argc, char *argv[] )
 				break;
 			case 'o':
 				outfile = optarg;
+				break;
+			case 't':
+				threads = atoi(optarg);
 				break;
 			case 'h':
 				show_help();
@@ -167,7 +172,3 @@ int iteration_to_color( int i, int max )
 	int gray = 255*i/max;
 	return MAKE_RGBA(gray,gray,gray,0);
 }
-
-
-
-
