@@ -34,6 +34,9 @@ long double getS(int x,long double a, int nMandels, long double minS) {
 }
 
 int main (int argc, char *argv[]) {
+  time_t stime;
+  time_t etime;
+  stime = time(NULL);
   char c;
   int nProcs = 3; // default arg of how many proccesses to have
   int t = 3; // default threads
@@ -62,14 +65,14 @@ int main (int argc, char *argv[]) {
   char cBuffer[200]; // holds mandel command string
   char command[] = "./mandel";
   char outfile[30];
-  int w = 1000;
-  int h = 1000;
-  int m = 5000;
+  int w = 800;
+  int h = 800;
+  int m = 3000;
 
   long double x = .32408; // .330658
   long double y = .40397; // .42685
   long double maxS = 2; // least zoom
-  long double minS = .00000001; // farthest zoom //.000000005
+  long double minS = .00001; // farthest zoom //.000000005
   long double cS = maxS; // current s
   char sw[25], sh[25], sm[25], sx[25], sy[25], ss[25], st[25]; // string version of arguments
   // long double step = (maxS - minS) / (nMandels-1); // s change size
@@ -107,6 +110,6 @@ int main (int argc, char *argv[]) {
     wait(&status);
     cProcs--;
   }
-
-
+  etime = time(NULL);
+  printf("time elapsed %ld\n", etime - stime);
 }
