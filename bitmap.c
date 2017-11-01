@@ -108,7 +108,6 @@ int bitmap_save( struct bitmap *m, const char *path )
 
 	file = fopen(path,"wb");
 	if(!file) return 0;
-
 	memset(&header,0,sizeof(header));
 	header.magic1 = 'B';
 	header.magic2 = 'M';
@@ -191,7 +190,7 @@ struct bitmap * bitmap( const char *path )
 			m->data[i] = 0;
 		} else {
 			m->data[i] = MAKE_RGBA(r,g,b,255);
-		}	
+		}
 	}
 
 	fclose(file);
